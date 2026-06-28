@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>영어 수행평가 워크시트 생성기 · 2022 개정 영어Ⅱ</title>
+  <meta name="description" content="2022 개정 영어과(영어Ⅱ) 수행평가 학생용 워크시트와 채점 루브릭을 브라우저에서 바로 .docx로 만드는 무료 도구. 쓰기·말하기 두 버전 지원." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site">
+    <div class="wrap">
+      <p class="eyebrow">2022 개정 영어과 · 영어Ⅱ 수행평가</p>
+      <h1>영어 수행평가 워크시트 생성기</h1>
+      <p class="lede">교과서 단원·필수 표현·문법·주제만 채우면 학생용 워크시트와 채점 루브릭을 <strong>.docx</strong>로 만들어 드립니다. 쓰기·말하기 두 버전, 각 2차시 구조.</p>
+      <p class="meta">무료 · 설치 없음 · 모든 작업은 이 브라우저 안에서만 처리되며 어떤 입력도 서버로 전송되지 않습니다.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- 사용법 3줄 -->
+    <ol class="howto" aria-label="사용 방법">
+      <li><b>버전</b>(쓰기·말하기)을 고릅니다. 폼에는 예시가 채워져 있어요.</li>
+      <li>교과서·필수 표현·문법·주제를 <b>내 단원에 맞게</b> 고칩니다. (표현·문법 개수는 자유)</li>
+      <li><b>.docx 만들기</b>를 누르면 워크시트가 내려받아집니다. (한글에서도 열립니다)</li>
+    </ol>
+
+    <!-- 버전 선택 -->
+    <div class="mode-row" role="group" aria-label="워크시트 버전">
+      <span class="mode-label">버전</span>
+      <div class="seg" id="modeSeg">
+        <button type="button" class="seg-btn is-on" data-mode="writing" aria-pressed="true">쓰기</button>
+        <button type="button" class="seg-btn" data-mode="speaking" aria-pressed="false">말하기</button>
+      </div>
+      <span class="mode-hint" id="modeHint">단계별 구상 → 제안서 작성 (자기·동료평가 없음)</span>
+    </div>
+
+    <!-- 1. 기본 정보 -->
+    <section class="card">
+      <p class="card-no">01</p>
+      <h2>기본 정보</h2>
+      <div class="grid">
+        <label class="field span2">제목
+          <input type="text" id="title" placeholder="영어Ⅱ 수행평가 — 진로 분야 문제 해결 제안서 쓰기" />
+        </label>
+        <label class="field span2">부제 (영문, 선택)
+          <input type="text" id="subtitle" placeholder="Writing a Problem–Solution Proposal" />
+        </label>
+        <label class="field">학교명
+          <input type="text" id="school" placeholder="○○고등학교" />
+        </label>
+        <label class="field">학년
+          <input type="text" id="grade" placeholder="3" />
+        </label>
+        <label class="field span2">평가 목적
+          <textarea id="purpose" rows="2" placeholder="진로 분야의 문제 상황에 대한 해결책을 제안서 형식으로 논리적으로 쓰는 능력을 평가한다."></textarea>
+        </label>
+      </div>
+    </section>
+
+    <!-- 2. 성취기준 -->
+    <section class="card">
+      <p class="card-no">02</p>
+      <h2>성취기준 <span class="sub">2022 개정 코드 (12영Ⅱ-…)</span></h2>
+      <div id="standardsList" class="rows"></div>
+      <button type="button" class="ghost" id="addStandard">+ 성취기준 추가</button>
+    </section>
+
+    <!-- 3. 조건 -->
+    <section class="card">
+      <p class="card-no">03</p>
+      <h2>조건 <span class="sub">여기 입력한 표현·문법이 본문 작성 지침과 채점 루브릭에 그대로 들어갑니다</span></h2>
+      <div class="grid">
+        <label class="field span2">분량
+          <input type="text" id="length" placeholder="영어 250단어 이상" />
+        </label>
+        <label class="field span2">포함할 내용 요소 <span class="hint">쉼표로 구분</span>
+          <input type="text" id="contentElements" placeholder="문제 상황, 원인, 해결책 2가지, 기대 효과" />
+        </label>
+      </div>
+
+      <div class="cond-grid">
+        <div class="cond-col cond-expr">
+          <p class="cond-head">필수 표현 <span class="count" id="exprCount">0개</span></p>
+          <p class="cond-cap">의사소통 기능</p>
+          <div id="exprList" class="rows tight"></div>
+          <button type="button" class="ghost sm" data-add="expr">+ 표현 추가</button>
+        </div>
+        <div class="cond-col cond-gram">
+          <p class="cond-head">필수 문법 <span class="count" id="gramCount">0개</span></p>
+          <p class="cond-cap">언어 형식</p>
+          <div id="gramList" class="rows tight"></div>
+          <button type="button" class="ghost sm" data-add="gram">+ 문법 추가</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 차시 구성 -->
+    <section class="card">
+      <p class="card-no">04</p>
+      <h2>차시 구성</h2>
+
+      <!-- 쓰기 -->
+      <div id="writingSession" class="mode-pane">
+        <p class="pane-note">1차시는 <strong>브레인스토밍 → 단계별 구상</strong>(영어 문장 프레임 + 우리말 구상 칸), 2차시는 <strong>제안서 형식 작성</strong>으로 자동 구성됩니다. 1차시 단계 문구는 아래 ‘고급’에서 직접 손볼 수 있어요.</p>
+        <div class="inline-fields">
+          <label class="chk"><input type="checkbox" id="mindmapOn" checked /> 1차시에 마인드맵 포함</label>
+          <label class="field grow">마인드맵 중앙 주제
+            <input type="text" id="mindmapTopic" placeholder="Problem in My Career Field" />
+          </label>
+        </div>
+        <label class="field">2차시 분량 안내 문구
+          <input type="text" id="lengthNote" placeholder="전체 분량이 영어 250단어 이상이 되도록 작성할 것." />
+        </label>
+        <label class="field">2차시 제안서 본문 섹션 <span class="hint">한 줄에 ‘라벨 | 줄수’</span>
+          <textarea id="writingSections" rows="4" placeholder="Problem Statement (문제 제시) | 4"></textarea>
+        </label>
+      </div>
+
+      <!-- 말하기 -->
+      <div id="speakingSession" class="mode-pane" hidden>
+        <p class="pane-note">1차시는 <strong>발표 개요 카드 → 핵심 문장 정리 → 자기평가 → 동료평가</strong>, 2차시는 <strong>구술</strong>로 구성됩니다.</p>
+        <div class="inline-fields">
+          <label class="field">핵심 문장 칸 개수
+            <input type="number" id="keyCount" min="1" max="10" value="4" />
+          </label>
+          <label class="field grow">발표 제한 시간
+            <input type="text" id="timeLimit" placeholder="70초" />
+          </label>
+        </div>
+        <label class="field">자기평가 항목 <span class="hint">한 줄에 하나 · 비우면 기본 항목</span>
+          <textarea id="selfEval" rows="3" placeholder="문제·해결책·기대효과가 잘 드러나게 구성했는가?"></textarea>
+        </label>
+        <label class="field">동료평가 항목 <span class="hint">한 줄에 하나 · 비우면 기본 항목</span>
+          <textarea id="peerEval" rows="3" placeholder="주제에 맞는 내용을 적절한 형식으로 말했는가?"></textarea>
+        </label>
+      </div>
+    </section>
+
+    <!-- 5. 옵션 -->
+    <section class="card">
+      <p class="card-no">05</p>
+      <h2>채점 루브릭 · 예시답안</h2>
+      <label class="chk"><input type="checkbox" id="rubricOn" checked /> 채점 루브릭(교사용) 동봉 — 2022 성취수준 A~E</label>
+      <div id="rubricPreview" class="rubric-preview"></div>
+      <p class="hint">루브릭 서술어를 직접 고치려면 아래 ‘고급 — 스펙 JSON’에서 수정하세요.</p>
+
+      <label class="chk mt"><input type="checkbox" id="modelOn" /> 예시 답안(교사용) 동봉</label>
+      <div id="modelWrap" hidden>
+        <label class="field">예시 답안 본문
+          <textarea id="modelAnswer" rows="5" placeholder="고등학생 수준의 자연스러운 모범문을 넣습니다."></textarea>
+        </label>
+        <label class="field">사용된 필수 표현·문법 메모 <span class="hint">한 줄에 하나</span>
+          <textarea id="modelNotes" rows="3" placeholder="I suggest that S+V — 해결책 제시"></textarea>
+        </label>
+      </div>
+    </section>
+
+    <!-- AI 보조: 프롬프트 만들기 (선택) -->
+    <details class="card adv ai-card">
+      <summary><span class="card-no">AI</span> AI로 초안 받기 — 프롬프트 만들기 <span class="sub">선택 사항</span></summary>
+      <p class="hint">폼 채우기가 막막하면, 평소 쓰는 AI(ChatGPT·Gemini·Claude 등)로 초안을 받을 수 있어요. 무엇을 쓰든 됩니다.</p>
+      <ol class="ai-steps">
+        <li><b>프롬프트 만들기 → 복사</b>를 누릅니다.</li>
+        <li>쓰는 AI를 열고 프롬프트를 붙여넣습니다.</li>
+        <li><b class="warn">교과서 지문·단원 내용을 그 AI에 함께 붙여넣습니다.</b> (이 사이트가 아니라 <u>당신의 AI</u>가 교과서를 읽습니다. 프롬프트 안 ⚠ 칸을 채우면 됩니다.)</li>
+        <li>AI가 준 <b>JSON</b>을 복사해 아래 <b>‘06 고급’ 칸</b>에 붙여넣습니다.</li>
+        <li><b>이 JSON으로 생성</b>을 켜고 <b>.docx 만들기</b>를 누릅니다.</li>
+      </ol>
+      <div class="adv-btns">
+        <button type="button" class="ghost sm" id="makePrompt">현재 입력으로 프롬프트 만들기</button>
+        <button type="button" class="ghost sm" id="copyPrompt">복사</button>
+        <span class="json-status" id="promptStatus"></span>
+      </div>
+      <textarea id="promptBox" class="mono" rows="14" spellcheck="false" readonly placeholder="‘프롬프트 만들기’를 누르면 여기에 생성됩니다. 복사해서 쓰는 AI에 붙여넣으세요."></textarea>
+    </details>
+
+    <!-- 6. 고급 -->
+    <details class="card adv">
+      <summary><span class="card-no">06</span> 고급 — 스펙 JSON 직접 편집</summary>
+      <p class="hint">위 입력으로 만들어지는 스펙입니다. 직접 고친 뒤 ‘이 JSON으로 생성’을 켜면 폼 대신 이 내용으로 .docx를 만듭니다. 1차시 단계(steps)·개요 카드·루브릭 서술어 등 세부도 여기서 조정할 수 있어요.</p>
+      <label class="chk"><input type="checkbox" id="useJson" /> 이 JSON으로 생성 (폼 입력 무시)</label>
+      <textarea id="specJson" class="mono" rows="16" spellcheck="false"></textarea>
+      <div class="adv-btns">
+        <button type="button" class="ghost sm" id="refreshJson">폼 → JSON 다시 채우기</button>
+        <span class="json-status" id="jsonStatus"></span>
+      </div>
+    </details>
+
+    <!-- 생성될 구성 미리보기 -->
+    <section class="card preview-card">
+      <h2>생성될 구성</h2>
+      <ol id="outline" class="outline"></ol>
+    </section>
+  </main>
+
+  <div class="actionbar">
+    <div class="wrap actionbar-in">
+      <div class="action-left">
+        <button type="button" class="ghost" id="resetForm">초기화</button>
+      </div>
+      <div class="action-right">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button type="button" class="primary" id="generate">.docx 만들기</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-foot">
+    <div class="wrap">
+      <p>2022 개정 영어과 수행평가 워크시트 생성기. 누구나 자유롭게 사용·수정·공유할 수 있습니다.</p>
+      <p class="small">문서 생성: <code>docx</code> 라이브러리(브라우저 빌드). 한글 글꼴은 ‘맑은 고딕’ 기준으로 지정됩니다.</p>
+    </div>
+  </footer>
+
+  <script src="vendor/docx.iife.js"></script>
+  <script src="worksheet-builder.js"></script>
+  <script src="presets.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
